@@ -8,7 +8,7 @@ public Plugin myinfo =
     name = "EntWatch Config Maker",
     author = "tilgep",
     description = "Makes a basic EntWatch config for the current map.",
-    version = "1.3.1",
+    version = "1.4.0",
     url = "https://github.com/tilgep/EntWatch-Maker"
 };
 
@@ -17,9 +17,16 @@ enum Mode
     GFL = 0,
     DarkerZ,
     Mapea,
+    EntWatch4,
 }
 
 #define MODE_INFO "0-none, 1-spam, 2-cd, 3-uses, 4-use w/ cd, 5-cd after uses, 6-counter stop@min, 7-counter stop@max"
+
+// EntWatch 4.2 (srcdslab/sm-plugin-entwatch-4) config values
+#define EW4_CONFIG_VERSION  "2"
+#define EW4_TYPE_INFO       "0-none, 1-use, 2-output, 3-counterup, 4-counterdown"
+#define EW4_MODE_INFO       "0-none, 1-cooldown, 2-maxuses, 3-cooldown after uses, 4-counter value"
+#define EW4_TRIGGER_INFO    "0-none, 1-strip, 2-button, 3-hurt"
 #define DEFAULT_DIR_PERMS FPERM_O_READ|FPERM_O_EXEC|FPERM_G_READ|FPERM_G_EXEC|FPERM_U_READ|FPERM_U_WRITE|FPERM_U_EXEC
 Mode mode;
 char path[PLATFORM_MAX_PATH];
@@ -45,7 +52,7 @@ public void OnPluginStart()
     dire = CreateConVar("ewmaker_path", "addons/sourcemod/configs/entwatch_maker", "Path to store generated configs in. Relative to csgo/", _, true, 0.0, true, 1.0);
     dire.AddChangeHook(Cvar_Changed);
 
-    style = CreateConVar("ewmaker_style", "1", "Options to include (0=GFL style, 1=DarkerZ Style, 2=Mapea MapTrack style)", _, true, 0.0, true, 2.0);
+    style = CreateConVar("ewmaker_style", "1", "Options to include (0=GFL style, 1=DarkerZ Style, 2=Mapea MapTrack style, 3=EntWatch 4.2 style)", _, true, 0.0, true, 3.0);
     style.AddChangeHook(Cvar_Changed);
 
     RegConsoleCmd("sm_ewmake", Command_Make);
@@ -174,6 +181,11 @@ public int LoadConfig()
     {
         file.WriteLine("\"%s\"\n{", g_currentmap);
     }
+    else if(mode == EntWatch4)
+    {
+        file.WriteLine("\"items\"\n{");
+        file.WriteLine("\t\"configversion\"   \"%s\"", EW4_CONFIG_VERSION);
+    }
     else
     {
         file.WriteLine("\"entities\"\n{", g_currentmap);
@@ -271,7 +283,7 @@ public int LoadConfig()
         }
 
         // find pt_spawner
-        if(mode == DarkerZ)
+        if(mode == DarkerZ || mode == EntWatch4)
         {
             bool found;
             for(int t = 0; t < temp.Length; t++)
@@ -399,8 +411,80 @@ public int LoadConfig()
                 file.WriteLine("\t\t\"chat\"            \"true\"");
                 file.WriteLine("\t\t\"hud\"             \"true\"");
             }
+            case EntWatch4:
+            {
+                file.WriteLine("\t\t\"name\"            \"%s\" // currently weapon targetname (change me)", targe);
+                file.WriteLine("\t\t\"short\"           \"%s\" // currently weapon targetname (change me)", targe);
+                file.WriteLine("\t\t\"color\"           \"FFFFFF\" // RRGGBB hex without '#' (change me)");
+                file.WriteLine("\t\t\"hammerid\"        \"%s\"", hammer);
+                file.WriteLine("\t\t");
+                file.WriteLine("\t\t// [EntWatchMaker] Settings below may need changing.");
+                file.WriteLine("\t\t\"showmessages\"    \"1\"");
+                file.WriteLine("\t\t\"showinterface\"   \"1\"");
+                file.WriteLine("\t\t\"allowtransfer\"   \"%s\"", knife ? "0" : "1");
+                file.WriteLine("\t\t\"template\"        \"%s\" // point_template used by sm_espawnitem (optional)", templatename);
+                file.WriteLine("\t\t");
+
+                file.WriteLine("\t\t\"buttons\"");
+                file.WriteLine("\t\t{");
+                int bindex = 0;
+                for(int b = gameui ? buts.Length : 0; b < buts.Length; b++)
+                {
+                    button = EntityLump.Get(buts.Get(b));
+                    button.GetNextKey("parentname", paren, sizeof(paren));
+                    if(!StrEqual(paren, targe))
+                    {
+                        delete button;
+                        continue;
+                    }
+
+                    bhammer[0] = '\0';
+                    button.GetNextKey("hammerid", bhammer, sizeof(bhammer));
+                    delete button;
+
+                    if(bhammer[0] == '\0')
+                        continue;
+
+                    file.WriteLine("\t\t\t\"%d\"", bindex);
+                    file.WriteLine("\t\t\t{");
+                    file.WriteLine("\t\t\t\t\"name\"          \"\"");
+                    file.WriteLine("\t\t\t\t\"hammerid\"      \"%s\"", bhammer);
+                    file.WriteLine("\t\t\t\t\"type\"          \"1\" // %s", EW4_TYPE_INFO);
+                    file.WriteLine("\t\t\t\t\"mode\"          \"0\" // %s", EW4_MODE_INFO);
+                    file.WriteLine("\t\t\t\t\"maxuses\"       \"0\" // mode = 2/3");
+                    file.WriteLine("\t\t\t\t\"cooldown\"      \"0\" // mode = 1/3, button cooldown in seconds");
+                    file.WriteLine("\t\t\t\t\"itemcooldown\"  \"0\" // item-wide cooldown in seconds");
+                    file.WriteLine("\t\t\t\t//\"output\"        \"\" // entity output name, used when type = 2");
+                    file.WriteLine("\t\t\t\t\"showactivate\"  \"1\"");
+                    file.WriteLine("\t\t\t\t\"showcooldown\"  \"1\"");
+                    file.WriteLine("\t\t\t}");
+                    bindex++;
+                }
+                if(bindex == 0)
+                {
+                    file.WriteLine("\t\t\t// [EntWatchMaker] No button auto-detected. Add one manually:");
+                    file.WriteLine("\t\t\t//\"0\"");
+                    file.WriteLine("\t\t\t//{");
+                    file.WriteLine("\t\t\t//\t\"hammerid\"  \"0\"");
+                    file.WriteLine("\t\t\t//\t\"type\"      \"1\"");
+                    file.WriteLine("\t\t\t//\t\"mode\"      \"0\"");
+                    file.WriteLine("\t\t\t//}");
+                }
+                file.WriteLine("\t\t}");
+                file.WriteLine("\t\t");
+
+                file.WriteLine("\t\t\"triggers\"");
+                file.WriteLine("\t\t{");
+                file.WriteLine("\t\t\t// [EntWatchMaker] Triggers are not auto-detected. Add manually if needed:");
+                file.WriteLine("\t\t\t//\"0\"");
+                file.WriteLine("\t\t\t//{");
+                file.WriteLine("\t\t\t//\t\"hammerid\"  \"0\"");
+                file.WriteLine("\t\t\t//\t\"type\"      \"1\" // %s", EW4_TRIGGER_INFO);
+                file.WriteLine("\t\t\t//}");
+                file.WriteLine("\t\t}");
+            }
         }
-        
+
         file.WriteLine("\t}");
         index++;
     }
