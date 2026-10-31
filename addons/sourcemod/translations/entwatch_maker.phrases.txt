@@ -1,0 +1,35 @@
+"Phrases"
+{
+	"Config Create Failed"
+	{
+		"#format"	"{1:s}"
+		"en"		"Failed to create config file {1}"
+		"fr"		"Impossible de créer le fichier de config {1}"
+		"ru"		"Не удалось создать файл конфига {1}"
+		"es"		"No se pudo crear el archivo de configuración {1}"
+		"de"		"Konfigurationsdatei {1} konnte nicht erstellt werden"
+		"pt"		"Falha ao criar o arquivo de configuração {1}"
+		"chi"		"无法创建配置文件 {1}"
+	}
+	"No Items Found"
+	{
+		"en"		"No items found in the map!"
+		"fr"		"Aucun item trouvé dans la map !"
+		"ru"		"На карте не найдено предметов!"
+		"es"		"¡No se encontraron ítems en el mapa!"
+		"de"		"Keine Items in der Map gefunden!"
+		"pt"		"Nenhum item encontrado no mapa!"
+		"chi"		"地图中未找到任何道具！"
+	}
+	"Config Created"
+	{
+		"#format"	"{1:s}"
+		"en"		"Config created at {1}"
+		"fr"		"Config créée dans {1}"
+		"ru"		"Конфиг создан: {1}"
+		"es"		"Configuración creada en {1}"
+		"de"		"Konfiguration erstellt unter {1}"
+		"pt"		"Configuração criada em {1}"
+		"chi"		"配置已创建于 {1}"
+	}
+}
