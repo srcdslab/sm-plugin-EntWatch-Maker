@@ -8,7 +8,7 @@ public Plugin myinfo =
     name = "EntWatch Config Maker",
     author = "tilgep",
     description = "Makes a basic EntWatch config for the current map.",
-    version = "1.4.1",
+    version = "1.4.2",
     url = "https://github.com/tilgep/EntWatch-Maker"
 };
 
@@ -57,7 +57,7 @@ public void OnPluginStart()
     style = CreateConVar("ewmaker_style", "1", "Options to include (0=GFL style, 1=DarkerZ Style, 2=Mapea MapTrack style, 3=EntWatch 4.2 style)", _, true, 0.0, true, 3.0);
     style.AddChangeHook(Cvar_Changed);
 
-    RegConsoleCmd("sm_ewmake", Command_Make);
+    RegAdminCmd("sm_ewmake", Command_Make, ADMFLAG_CONFIG);
     AutoExecConfig();
 }
 
