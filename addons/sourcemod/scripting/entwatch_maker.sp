@@ -8,7 +8,7 @@ public Plugin myinfo =
     name = "EntWatch Config Maker",
     author = "tilgep",
     description = "Makes a basic EntWatch config for the current map.",
-    version = "1.4.0",
+    version = "1.4.1",
     url = "https://github.com/tilgep/EntWatch-Maker"
 };
 
@@ -43,6 +43,8 @@ ConVar style;
 
 public void OnPluginStart()
 {
+    LoadTranslations("entwatch_maker.phrases");
+
     weps = new ArrayList();
     buts = new ArrayList();
     filt = new ArrayList();
@@ -108,9 +110,9 @@ public Action Command_Make(int client, int args)
 {
     switch(LoadConfig())
     {
-        case 0: ReplyToCommand(client, "Failed to create config file %s", path);
-        case 1: ReplyToCommand(client, "No items found in the map!");
-        case 2: ReplyToCommand(client, "Config created at %s", path);
+        case 0: ReplyToCommand(client, "%t", "Config Create Failed", path);
+        case 1: ReplyToCommand(client, "%t", "No Items Found");
+        case 2: ReplyToCommand(client, "%t", "Config Created", path);
     }
     return Plugin_Handled;
 }
