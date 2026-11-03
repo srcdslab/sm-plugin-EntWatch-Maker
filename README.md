@@ -4,7 +4,7 @@ Creates a basic EntWatch config for the current map.
   
 This will generate the number of blocks needed for all the items in a map and will fill in some info about them.  
   
-Recommended to only use on test servers as the command is available for all players.  
+Recommended to only use on test servers. The command requires the config admin flag (`ADMFLAG_CONFIG`).  
 
 ## How to use
 - Install the latest [Sourcemod](https://sm.alliedmods.net/downloads.php?branch=stable)
