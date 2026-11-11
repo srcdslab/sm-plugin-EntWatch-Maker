@@ -8,7 +8,7 @@ public Plugin myinfo =
     name = "EntWatch Config Maker",
     author = "tilgep",
     description = "Makes a basic EntWatch config for the current map.",
-    version = "1.4.2",
+    version = "1.4.3",
     url = "https://github.com/tilgep/EntWatch-Maker"
 };
 
